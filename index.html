@@ -6,49 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WORKPULSE AI Manufacturing Management System Powered by Google Cloud</title>
 
-  <!-- 0. ADAPTADOR MÁGICO PARA CONECTAR GOOGLE SHEETS CON GITHUB PAGES -->
-  <script>
-    const URL_WEB_APP = "https://script.google.com/a/macros/nidec-ga.com/s/AKfycbx4ARiDNMg1jsd0U3UBDAwLWcT-yR0v_ftVBJVl8Ojlkd8vvGsD1TpNt8Amb2Uburg91A/exec";
-
-    window.google = {
-      script: {
-        run: {
-          withSuccessHandler(successCallback) {
-            this.success = successCallback;
-            return this;
-          },
-          withFailureHandler(failureCallback) {
-            this.failure = failureCallback;
-            return this;
-          },
-          $noSuchMethod(name, args) {
-            fetch(URL_WEB_APP, {
-              method: "POST",
-              body: JSON.stringify({ funcion: name, argumentos: args })
-            })
-            .then(res => res.json())
-            .then(data => {
-              if (this.success) this.success(data);
-            })
-            .catch(err => {
-              if (this.failure) this.failure(err);
-            });
-          }
-        }
-      }
-    };
-
-    const handlerProxy = {
-      get(target, prop) {
-        if (prop === 'withSuccessHandler' || prop === 'withFailureHandler') {
-          return target[prop].bind(target);
-        }
-        return (...args) => target.$noSuchMethod(prop, args);
-      }
-    };
-    window.google.script.run = new Proxy(window.google.script.run, handlerProxy);
-  </script>
-
   <!-- 1. INTENTO DE FAVICON ESTÁTICO -->
   <link id="favicon" rel="icon" type="image/png" href="https://www.nidec.com/files/user/www-nidec-com/corporate/about/slogan/img/img_slogan_01.png">
 
@@ -62,59 +19,55 @@
       document.getElementsByTagName('head')[0].appendChild(link);
     })();
   </script>
+    <!-- INTERCEPTOR GLOBAL DE ALERTAS DE GOOGLE (VERSIÓN CENTRADA Y GRANDE) -->
+    <script>
+        window.alert = function(mensaje) {
+            let toastAnterior = document.getElementById('wp-toast-msg');
+            if (toastAnterior) toastAnterior.remove();
 
-  <!-- INTERCEPTOR GLOBAL DE ALERTAS DE GOOGLE (VERSIÓN CENTRADA Y GRANDE) -->
-  <script>
-      window.alert = function(mensaje) {
-          let toastAnterior = document.getElementById('wp-toast-msg');
-          if (toastAnterior) toastAnterior.remove();
+            let toast = document.createElement('div');
+            toast.id = 'wp-toast-msg';
+            
+            let esError = mensaje.toLowerCase().includes('completa') || mensaje.toLowerCase().includes('falta') || mensaje.toLowerCase().includes('error');
+            let colorBg = esError ? '#dc2626' : '#009B4A';
+            let icono = esError ? '⚠️' : '✅';
+            let globalCerrados = [];
+            let globalEHS = [];
 
-          let toast = document.createElement('div');
-          toast.id = 'wp-toast-msg';
-          
-          let esError = mensaje.toLowerCase().includes('completa') || mensaje.toLowerCase().includes('falta') || mensaje.toLowerCase().includes('error');
-          let colorBg = esError ? '#dc2626' : '#009B4A';
-          let icono = esError ? '⚠️' : '✅';
-          let globalCerrados = [];
-          let globalEHS = [];
+            toast.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:' + colorBg + '; color:#ffffff; padding:25px 45px; border-radius:16px; font-weight:900; font-size:20px; z-index:999999; box-shadow:0 15px 40px rgba(0,0,0,0.5); font-family:"Segoe UI", Arial, sans-serif; border:4px solid #ffffff; display:flex; align-items:center; justify-content:center; gap:15px; text-align:center; max-width:85%; min-width:340px; transition: opacity 0.3s ease; text-transform:uppercase; letter-spacing:0.5px;';
+            toast.innerHTML = '<span style="font-size:34px;">' + icono + '</span> <span>' + mensaje + '</span>';
 
-          toast.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:' + colorBg + '; color:#ffffff; padding:25px 45px; border-radius:16px; font-weight:900; font-size:20px; z-index:999999; box-shadow:0 15px 40px rgba(0,0,0,0.5); font-family:"Segoe UI", Arial, sans-serif; border:4px solid #ffffff; display:flex; align-items:center; justify-content:center; gap:15px; text-align:center; max-width:85%; min-width:340px; transition: opacity 0.3s ease; text-transform:uppercase; letter-spacing:0.5px;';
-          toast.innerHTML = '<span style="font-size:34px;">' + icono + '</span> <span>' + mensaje + '</span>';
+            let agregarAlBody = function() {
+                if (document.body) {
+                    document.body.appendChild(toast);
+                    setTimeout(function() {
+                        toast.style.opacity = '0';
+                        setTimeout(function() { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
+                    }, 3000);
+                }
+            };
 
-          let agregarAlBody = function() {
-              if (document.body) {
-                  document.body.appendChild(toast);
-                  setTimeout(function() {
-                      toast.style.opacity = '0';
-                      setTimeout(function() { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
-                  }, 3000);
-              }
-          };
+            if (document.readyState === 'loading') {
+                window.addEventListener('DOMContentLoaded', agregarAlBody);
+            } else {
+                agregarAlBody();
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- LIBRERÍAS PARA CÓDIGO DE BARRAS Y CAPTURA DE PANTALLA -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <!-- LIBRERÍA PARA LEER CÓDIGOS DE BARRAS CON LA CÁMARA -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
 
-          if (document.readyState === 'loading') {
-              window.addEventListener('DOMContentLoaded', agregarAlBody);
-          } else {
-              agregarAlBody();
-          }
-      };
-  </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-  <!-- LIBRERÍAS PARA CÓDIGO DE BARRAS Y CAPTURA DE PANTALLA -->
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <!-- LIBRERÍA PARA LEER CÓDIGOS DE BARRAS CON LA CAMARA -->
-  <script src="https://unpkg.com/html5-qrcode"></script>
-
-  <style>
-    /* Elevar botón de cerrar en el Pase */
-    .modal-pase-container .close-btn {
-      top: 5px !important;
-      right: 10px !important;
-      z-index: 20;
-    }
-  </style>
-</head>
+    <style>
+/* Elevar botón de cerrar en el Pase */
+.modal-pase-container .close-btn {
+  top: 5px !important;
+  right: 10px !important;
+  z-index: 20;
+}
 /* CSS FORMATO FA-RH-029 */
 .modal-pase-container { background: #ffffff; border: 3px solid #009B4A; border-radius: 12px; padding: 20px; max-width: 950px; width: 95%; margin: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); color: #000; position: relative; }
 .folio-tag-red { position: absolute; top: 15px; right: 20px; color: #dc2626; font-size: 26px; font-weight: 900; font-family: monospace; letter-spacing: 1px; }
